@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -134,41 +135,67 @@ namespace power4000
 
             Dgv.Invoke((Action)(() =>
             {
-                Dgv.Rows[rowIndex].Cells["col_Seq"].Value = sequenceNumber++;
-                Dgv.Rows[rowIndex].Cells["col_Time"].Value = currentTime;
-                Dgv.Rows[rowIndex].Cells["col_Mid"].Value = colMidValue;
-                Dgv.Rows[rowIndex].Cells["col_Type"].Value = type;
+                Dgv.Rows.Insert(0);
+                DataGridViewRow newRow = Dgv.Rows[0];
+                newRow.Cells["col_Seq"].Value = sequenceNumber++;
+                newRow.Cells["col_Time"].Value = currentTime;
+                newRow.Cells["col_Mid"].Value = colMidValue;
+                newRow.Cells["col_Type"].Value = type;
+
+                if (type == "RECV")
+                {
+                    newRow.DefaultCellStyle.ForeColor = Color.DarkBlue;
+                }
+                //else if (type == "Error")
+                //{
+                //    newRow.DefaultCellStyle.ForeColor = Color.Red;
+                //}
+                //else
+                //{
+                //    newRow.DefaultCellStyle.ForeColor = Color.Black;
+                //}
             }));
 
-            // Check if received data is "0052"
-            if (colMidValue == "0052")
+            // Call CheckReceivedData to handle specific responses
+            CheckReceivedData(colMidValue);
+        }
+
+        private void CheckReceivedData(string colMidValue)
+        {
+            try
             {
-                // Stop keep-alive thread
-                stopKeepAlive = true;
-                // Wait for 2 seconds before sending the response
-                Thread.Sleep(2000);
-                // Send the response message
-                SendResponseMessage();
-                // Restart keep-alive thread
-                StartKeepAliveThread();
+                if (colMidValue == "0052")
+                {
+                    // Stop keep-alive thread
+                    stopKeepAlive = true;
+                    // Wait for 2 seconds before sending the response
+                    Thread.Sleep(2000);
+                    // Send the response message
+                    SendResponseMessage();
+                    // Restart keep-alive thread
+                    StartKeepAliveThread();
+                }
+                else if (colMidValue == "0035")
+                {
+                    // Stop keep-alive thread
+                    stopKeepAlive = true;
+                    // Send the response message for "0035"
+                    SendData(socket, "00200036001         ");
+                    // Restart keep-alive thread
+                    StartKeepAliveThread();
+                }
+                else if (colMidValue == "0061")
+                {
+                    // Stop keep-alive thread
+                    stopKeepAlive = true;
+                    // Send the response message for "0061"
+                    SendData(socket, "00200062001         ");
+                    // Restart keep-alive thread
+                    StartKeepAliveThread();
+                }
             }
-            // Check if received data is "0035"
-            else if (colMidValue == "0035")
+            catch (Exception ex)
             {
-                // Stop keep-alive thread
-                stopKeepAlive = true;
-                // Send the response message for "0035"
-                SendData(socket, "00200036001         ");
-                // Restart keep-alive thread
-                StartKeepAliveThread();
-            }
-            else if (colMidValue == "0061")
-            {
-                // Stop keep-alive thread
-                stopKeepAlive = true;
-                // Send the response message for "0035"
-                SendData(socket, "00200062001         ");
-                // Restart keep-alive thread
                 StartKeepAliveThread();
             }
         }
