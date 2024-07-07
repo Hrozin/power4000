@@ -41,6 +41,8 @@ namespace power4000
                 // Connect to the remote endpoint.
                 socket.Connect(remoteEP);
 
+                Logger.Log("Connected to server at " + serverIp + ":" + serverPort);
+
                 // Execute message sequences
                 if (SendInitialMessage(socket))
                 {
@@ -59,6 +61,7 @@ namespace power4000
             }
             catch (Exception ex)
             {
+                Logger.Log("Exception: " + ex.Message);
                 MessageBox.Show("Exception: " + ex.Message);
             }
         }
@@ -104,7 +107,9 @@ namespace power4000
             }
             else
             {
-                MessageBox.Show($"Unexpected response received: {colMidValue}");
+                string errorMsg = $"Unexpected response received: {colMidValue}";
+                Logger.Log(errorMsg);
+                MessageBox.Show(errorMsg);
                 return false;
             }
         }
@@ -113,6 +118,8 @@ namespace power4000
         {
             byte[] data = Encoding.ASCII.GetBytes(message);
             socket.Send(data);
+
+            Logger.Log("Sent: " + message);
 
             // Display sent data in Dgv
             DisplayDataInDgv(message, "SEND");
@@ -124,6 +131,8 @@ namespace power4000
             int bytesRead = socket.Receive(buffer);
             string responseData = Encoding.ASCII.GetString(buffer, 0, bytesRead);
 
+            Logger.Log("Received: " + responseData);
+
             return responseData;
         }
 
@@ -131,10 +140,10 @@ namespace power4000
         {
             string colMidValue = data.Substring(4, 4);
             string currentTime = DateTime.Now.ToString("HH:mm:ss");
-            int rowIndex = (int)Dgv.Invoke((Func<int>)(() => Dgv.Rows.Add()));
 
             Dgv.Invoke((Action)(() =>
             {
+                // Insert the new row at the top (index 0)
                 Dgv.Rows.Insert(0);
                 DataGridViewRow newRow = Dgv.Rows[0];
                 newRow.Cells["col_Seq"].Value = sequenceNumber++;
@@ -146,14 +155,6 @@ namespace power4000
                 {
                     newRow.DefaultCellStyle.ForeColor = Color.DarkBlue;
                 }
-                //else if (type == "Error")
-                //{
-                //    newRow.DefaultCellStyle.ForeColor = Color.Red;
-                //}
-                //else
-                //{
-                //    newRow.DefaultCellStyle.ForeColor = Color.Black;
-                //}
             }));
 
             // Call CheckReceivedData to handle specific responses
@@ -162,40 +163,33 @@ namespace power4000
 
         private void CheckReceivedData(string colMidValue)
         {
-            try
+            if (colMidValue == "0052")
             {
-                if (colMidValue == "0052")
-                {
-                    // Stop keep-alive thread
-                    stopKeepAlive = true;
-                    // Wait for 2 seconds before sending the response
-                    Thread.Sleep(2000);
-                    // Send the response message
-                    SendResponseMessage();
-                    // Restart keep-alive thread
-                    StartKeepAliveThread();
-                }
-                else if (colMidValue == "0035")
-                {
-                    // Stop keep-alive thread
-                    stopKeepAlive = true;
-                    // Send the response message for "0035"
-                    SendData(socket, "00200036001         ");
-                    // Restart keep-alive thread
-                    StartKeepAliveThread();
-                }
-                else if (colMidValue == "0061")
-                {
-                    // Stop keep-alive thread
-                    stopKeepAlive = true;
-                    // Send the response message for "0061"
-                    SendData(socket, "00200062001         ");
-                    // Restart keep-alive thread
-                    StartKeepAliveThread();
-                }
+                // Stop keep-alive thread
+                stopKeepAlive = true;
+                // Wait for 2 seconds before sending the response
+                Thread.Sleep(2000);
+                // Send the response message
+                SendResponseMessage();
+                // Restart keep-alive thread
+                StartKeepAliveThread();
             }
-            catch (Exception ex)
+            else if (colMidValue == "0035")
             {
+                // Stop keep-alive thread
+                stopKeepAlive = true;
+                // Send the response message for "0035"
+                SendData(socket, "00200036001         ");
+                // Restart keep-alive thread
+                StartKeepAliveThread();
+            }
+            else if (colMidValue == "0061")
+            {
+                // Stop keep-alive thread
+                stopKeepAlive = true;
+                // Send the response message for "0061"
+                SendData(socket, "00200062001         ");
+                // Restart keep-alive thread
                 StartKeepAliveThread();
             }
         }
@@ -229,6 +223,7 @@ namespace power4000
                 }
                 catch (Exception ex)
                 {
+                    Logger.Log("Exception in keep-alive: " + ex.Message);
                     MessageBox.Show("Exception in keep-alive: " + ex.Message);
                     break;
                 }
