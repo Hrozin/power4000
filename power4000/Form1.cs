@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace power4000
 {
     public partial class Form1 : Form
     {
-        private Thread keepAliveThread;
+        private CancellationTokenSource keepAliveCancellationTokenSource;
         private Socket socket;
         private int sequenceNumber = 0; // Sequence number for col_Seq
-        private bool stopKeepAlive = false; // Flag to stop the keep-alive thread
+        bool TagMove;
+        int MValX, MValY;
 
         public Form1()
         {
@@ -22,11 +25,11 @@ namespace power4000
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            txtip.Text = GetLocalIPAddress();
+            txtip.Text = LocalIP();
             txtport.Text = "4545";
         }
 
-        private void btn_start_Click(object sender, EventArgs e)
+        private async void btn_start_Click(object sender, EventArgs e)
         {
             string serverIp = txtip.Text;
             int serverPort = int.Parse(txtport.Text);
@@ -39,96 +42,98 @@ namespace power4000
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, serverPort);
 
                 // Connect to the remote endpoint.
-                socket.Connect(remoteEP);
+                await socket.ConnectAsync(remoteEP);
 
-                Logger.Log("Connected to server at " + serverIp + ":" + serverPort);
+                Logger.Log("서버연결 " + serverIp + ":" + serverPort);
 
                 // Execute message sequences
-                if (SendInitialMessage(socket))
+                if (await SendInitialMessage(socket))
                 {
-                    if (SendSecondMessage(socket))
+                    if (await SendSecondMessage(socket))
                     {
-                        if (SendThirdMessage(socket))
+                        if (await SendThirdMessage(socket))
                         {
-                            if (SendFourthMessage(socket))
+                            if (await SendFourthMessage(socket))
                             {
-                                // Start keep-alive thread after the last message
+                                // Start keep-alive and receive threads after the last message
                                 StartKeepAliveThread();
+                                StartRECVThread();
                             }
                         }
                     }
-                }
+                }                
+
             }
             catch (Exception ex)
             {
-                Logger.Log("Exception: " + ex.Message);
-                MessageBox.Show("Exception: " + ex.Message);
+                Logger.Log("예외: " + ex.Message);
+                MessageBox.Show("예외: " + ex.Message);
             }
         }
 
-        private bool SendInitialMessage(Socket socket)
+        private Task<bool> SendInitialMessage(Socket socket)
         {
             return SendAndReceive(socket, "00200001001         ", "0002");
         }
 
-        private bool SendSecondMessage(Socket socket)
+        private Task<bool> SendSecondMessage(Socket socket)
         {
             return SendAndReceive(socket, "00200060001         ", "0005");
         }
 
-        private bool SendThirdMessage(Socket socket)
+        private Task<bool> SendThirdMessage(Socket socket)
         {
             return SendAndReceive(socket, "00200051001         ", "0005");
         }
 
-        private bool SendFourthMessage(Socket socket)
+        private Task<bool> SendFourthMessage(Socket socket)
         {
             return SendAndReceive(socket, "00200034001         ", "0005");
         }
 
-        private bool SendAndReceive(Socket socket, string message, string expectedResponse)
+        private async Task<bool> SendAndReceive(Socket socket, string message, string expectedResponse)
         {
             // Send data to the server
-            SendData(socket, message);
+            await SendData(socket, message);
 
             // Receive data from the server
-            string responseData = ReceiveData(socket);
+            string responseData = await ReceiveData(socket);
 
             // Extract col_Mid value from received data
-            string colMidValue = responseData.Substring(4, 4);
+            string MidValue = responseData.Substring(4, 4);
 
             // Display received data in Dgv
-            DisplayDataInDgv(responseData, "RECV");
+            DataInDgv(responseData, "RECV");
 
             // Check if the response matches the expected value
-            if (colMidValue == expectedResponse)
+            if (MidValue == expectedResponse)
             {
                 return true;
             }
             else
             {
-                string errorMsg = $"Unexpected response received: {colMidValue}";
+                string errorMsg = $"Unexpected response received: {MidValue}";
                 Logger.Log(errorMsg);
                 MessageBox.Show(errorMsg);
                 return false;
             }
         }
 
-        private void SendData(Socket socket, string message)
+        private async Task SendData(Socket socket, string message)
         {
             byte[] data = Encoding.ASCII.GetBytes(message);
-            socket.Send(data);
+            await socket.SendAsync(new ArraySegment<byte>(data), SocketFlags.None);
 
             Logger.Log("송신: " + message);
 
             // Display sent data in Dgv
-            DisplayDataInDgv(message, "SEND");
+            DataInDgv(message, "SEND");
         }
 
-        private string ReceiveData(Socket socket)
+        private async Task<string> ReceiveData(Socket socket)
         {
             byte[] buffer = new byte[256];
-            int bytesRead = socket.Receive(buffer);
+            int bytesRead = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), SocketFlags.None);
             string responseData = Encoding.ASCII.GetString(buffer, 0, bytesRead);
 
             Logger.Log("수신: " + responseData);
@@ -136,19 +141,26 @@ namespace power4000
             return responseData;
         }
 
-        private void DisplayDataInDgv(string data, string type)
+        private void DataInDgv(string data, string type)
         {
-            string colMidValue = data.Substring(4, 4);
+            string MidValue = data.Substring(4, 4);
             string currentTime = DateTime.Now.ToString("HH:mm:ss");
 
             Dgv.Invoke((Action)(() =>
             {
+
+                // Check if the data already exists in Dgv to prevent duplicates
+                bool alreadyExists = Dgv.Rows.Cast<DataGridViewRow>().Any(row =>
+                    row.Cells["col_Time"].Value?.ToString() == currentTime &&
+                    row.Cells["col_Mid"].Value?.ToString() == MidValue &&
+                    row.Cells["col_Type"].Value?.ToString() == type);
+
                 // Insert the new row at the top (index 0)
                 Dgv.Rows.Insert(0);
                 DataGridViewRow newRow = Dgv.Rows[0];
                 newRow.Cells["col_Seq"].Value = sequenceNumber++;
                 newRow.Cells["col_Time"].Value = currentTime;
-                newRow.Cells["col_Mid"].Value = colMidValue;
+                newRow.Cells["col_Mid"].Value = MidValue;
                 newRow.Cells["col_Type"].Value = type;
 
                 if (type == "RECV")
@@ -158,62 +170,58 @@ namespace power4000
             }));
 
             // Call CheckReceivedData to handle specific responses
-            CheckReceivedData(colMidValue);
+            //_ = CheckReceivedData(MidValue); // Fire and forget
         }
 
-        private void CheckReceivedData(string colMidValue)
+        private Task CheckReceivedData(string MidValue)
         {
-            if (colMidValue == "0052")
+            switch (MidValue)
             {
-                // Stop keep-alive thread
-                stopKeepAlive = true;
-                // Wait for 2 seconds before sending the response
-                //Thread.Sleep(2000);
-                // Send the response message
-                SendResponseMessage();
-                //SendData(socket, "00200036001         ");
-                // Restart keep-alive thread
-                StartKeepAliveThread();
-            }
-            else if (colMidValue == "0035")
-            {
-                // Stop keep-alive thread
-                stopKeepAlive = true;
-                // Send the response message for "0035"
-                SendData(socket, "00200036001         ");
-                // Restart keep-alive thread
-                StartKeepAliveThread();
-            }
-            else if (colMidValue == "0061")
-            {
-                // Stop keep-alive thread
-                stopKeepAlive = true;
-                // Send the response message for "0061"
-                SendData(socket, "00200062001         ");
-                // Restart keep-alive thread
-                StartKeepAliveThread();
+                case "0052":
+                    return Response0052();
+                case "0035":
+                    return Response0035();
+                case "0061":
+                    return Response0061();
+                default:
+                    return Task.CompletedTask;
             }
         }
 
-        private void SendResponseMessage()
+        private async Task Response0052()
         {
-            string responseMessage = "00200053001         ";
-            SendData(socket, responseMessage);
+            // Stop keep-alive thread
+            //keepAliveCancellationTokenSource.Cancel();
+            // Send the response message
+            await SendData(socket, "00200053001         ");                        
+        }
 
+        private async Task Response0035()
+        {
+            // Stop keep-alive thread
+            keepAliveCancellationTokenSource.Cancel();
+            // Send the response message for "0035"
+            await SendData(socket, "00200036001         ");
+        }
 
+        private async Task Response0061()
+        {
+            // Stop keep-alive thread
+            keepAliveCancellationTokenSource.Cancel();
+            // Send the response message for "0061"
+            await SendData(socket, "00200062001         ");
         }
 
         private void StartKeepAliveThread()
         {
-            stopKeepAlive = false;
-            keepAliveThread = new Thread(KeepConnectionAlive);
-            keepAliveThread.IsBackground = true; // Make sure the thread ends when the main application ends
-            keepAliveThread.Start();
+            keepAliveCancellationTokenSource = new CancellationTokenSource();
+            var token = keepAliveCancellationTokenSource.Token;
+            Task.Run(() => KeepConn(token), token);
         }
 
-        private void KeepConnectionAlive()
+        private async Task KeepConn(CancellationToken token)
         {
-            while (!stopKeepAlive)
+            while (!token.IsCancellationRequested)
             {
                 try
                 {
@@ -221,13 +229,7 @@ namespace power4000
                     {
                         // Send keep-alive message
                         string keepAliveMessage = "00209999001         ";
-                        SendData(socket, keepAliveMessage);
-
-                        // Receive response from server
-                        string responseData = ReceiveData(socket);
-
-                        // Display received data in Dgv
-                        DisplayDataInDgv(responseData, "RECV");
+                        await SendData(socket, keepAliveMessage);
                     }
                 }
                 catch (Exception ex)
@@ -236,11 +238,47 @@ namespace power4000
                     MessageBox.Show("유지 중 예외 발생: " + ex.Message);
                     break;
                 }
-                Thread.Sleep(3000); // 3 seconds interval
+                await Task.Delay(8000);
             }
-        }        
+        }
 
-        private string GetLocalIPAddress()
+        private void StartRECVThread()
+        {
+            Task.Run(ReceiveDataLoop);
+        }
+
+        private async Task ReceiveDataLoop()
+        {
+            while (true)
+            {
+                try
+                {
+                    if (socket != null && socket.Connected)
+                    {
+                        string responseData = await ReceiveData(socket);
+                        if (!string.IsNullOrEmpty(responseData))
+                        {
+                            // Display received data in Dgv
+                            DataInDgv(responseData, "RECV");
+
+                            // Extract col_Mid value from received data
+                            string MidValue = responseData.Substring(4, 4);
+
+                            // Check received data
+                            await CheckReceivedData(MidValue);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("데이터 수신 중 예외 발생: " + ex.Message);
+                    MessageBox.Show("데이터 수신 중 예외 발생: " + ex.Message);
+                    break;
+                }
+            }
+        }
+
+        private string LocalIP()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (var ip in host.AddressList)
@@ -255,12 +293,12 @@ namespace power4000
 
         private void btn_exit_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void btn_min_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
+            WindowState = FormWindowState.Minimized;
         }
 
         private void btn_end_Click(object sender, EventArgs e)
@@ -268,7 +306,10 @@ namespace power4000
             try
             {
                 // Stop the keep-alive thread
-                stopKeepAlive = true;
+                if (keepAliveCancellationTokenSource != null)
+                {
+                    keepAliveCancellationTokenSource.Cancel();
+                }
 
                 // Close the socket connection
                 if (socket != null && socket.Connected)
@@ -282,6 +323,46 @@ namespace power4000
             {
                 Logger.Log("종료 중 예외 발생: " + ex.Message);
                 MessageBox.Show("종료 중 예외 발생: " + ex.Message);
+            }
+        }
+
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
+        {
+            TagMove = true;
+            MValX = e.X;
+            MValY = e.Y;
+        }
+
+        private void Form1_MouseUp(object sender, MouseEventArgs e)
+        {
+            TagMove = false;
+        }
+
+        private void Form1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (TagMove == true)
+            {
+                SetDesktopLocation(MousePosition.X - MValX, MousePosition.Y - MValY);
+            }
+        }
+
+        private void panel1_MouseDown(object sender, MouseEventArgs e)
+        {
+            TagMove = true;
+            MValX = e.X;
+            MValY = e.Y;
+        }
+
+        private void panel1_MouseUp(object sender, MouseEventArgs e)
+        {
+            TagMove = false;
+        }
+
+        private void panel1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (TagMove == true)
+            {
+                SetDesktopLocation(MousePosition.X - MValX, MousePosition.Y - MValY);
             }
         }
     }
