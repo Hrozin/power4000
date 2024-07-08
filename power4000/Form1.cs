@@ -119,7 +119,7 @@ namespace power4000
             byte[] data = Encoding.ASCII.GetBytes(message);
             socket.Send(data);
 
-            Logger.Log("Sent: " + message);
+            Logger.Log("송신: " + message);
 
             // Display sent data in Dgv
             DisplayDataInDgv(message, "SEND");
@@ -131,7 +131,7 @@ namespace power4000
             int bytesRead = socket.Receive(buffer);
             string responseData = Encoding.ASCII.GetString(buffer, 0, bytesRead);
 
-            Logger.Log("Received: " + responseData);
+            Logger.Log("수신: " + responseData);
 
             return responseData;
         }
@@ -168,9 +168,10 @@ namespace power4000
                 // Stop keep-alive thread
                 stopKeepAlive = true;
                 // Wait for 2 seconds before sending the response
-                Thread.Sleep(2000);
+                //Thread.Sleep(2000);
                 // Send the response message
                 SendResponseMessage();
+                //SendData(socket, "00200036001         ");
                 // Restart keep-alive thread
                 StartKeepAliveThread();
             }
@@ -192,6 +193,14 @@ namespace power4000
                 // Restart keep-alive thread
                 StartKeepAliveThread();
             }
+        }
+
+        private void SendResponseMessage()
+        {
+            string responseMessage = "00200053001         ";
+            SendData(socket, responseMessage);
+
+
         }
 
         private void StartKeepAliveThread()
@@ -223,19 +232,13 @@ namespace power4000
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log("Exception in keep-alive: " + ex.Message);
-                    MessageBox.Show("Exception in keep-alive: " + ex.Message);
+                    Logger.Log("유지 중 예외 발생: " + ex.Message);
+                    MessageBox.Show("유지 중 예외 발생: " + ex.Message);
                     break;
                 }
                 Thread.Sleep(3000); // 3 seconds interval
             }
-        }
-
-        private void SendResponseMessage()
-        {
-            string responseMessage = "00200053001         ";
-            SendData(socket, responseMessage);
-        }
+        }        
 
         private string GetLocalIPAddress()
         {
@@ -247,7 +250,39 @@ namespace power4000
                     return ip.ToString();
                 }
             }
-            throw new Exception("Local IP Address Not Found!");
+            throw new Exception("로컬 IP를 찾을 수 없습니다.");
+        }
+
+        private void btn_exit_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void btn_min_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        private void btn_end_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Stop the keep-alive thread
+                stopKeepAlive = true;
+
+                // Close the socket connection
+                if (socket != null && socket.Connected)
+                {
+                    socket.Shutdown(SocketShutdown.Both);
+                    socket.Close();
+                    Logger.Log("소켓 닫힘");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("종료 중 예외 발생: " + ex.Message);
+                MessageBox.Show("종료 중 예외 발생: " + ex.Message);
+            }
         }
     }
 }

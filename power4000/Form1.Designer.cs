@@ -28,12 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.btn_start = new System.Windows.Forms.Button();
             this.btn_end = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -41,17 +41,17 @@
             this.txtip = new System.Windows.Forms.TextBox();
             this.txtport = new System.Windows.Forms.TextBox();
             this.Dgv = new System.Windows.Forms.DataGridView();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
             this.col_Seq = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.col_Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.col_Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.col_Mid = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.col_Msg = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.btn_min = new System.Windows.Forms.Button();
+            this.btn_exit = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.Dgv)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -74,6 +74,7 @@
             this.btn_end.TabIndex = 1;
             this.btn_end.Text = "End";
             this.btn_end.UseVisualStyleBackColor = true;
+            this.btn_end.Click += new System.EventHandler(this.btn_end_Click);
             // 
             // label1
             // 
@@ -118,14 +119,14 @@
             this.col_Type,
             this.col_Mid,
             this.col_Msg});
-            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle18.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle18.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            dataGridViewCellStyle18.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle18.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle18.SelectionForeColor = System.Drawing.SystemColors.GradientActiveCaption;
-            dataGridViewCellStyle18.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.Dgv.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.GradientActiveCaption;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.Dgv.DefaultCellStyle = dataGridViewCellStyle6;
             this.Dgv.GridColor = System.Drawing.SystemColors.Control;
             this.Dgv.Location = new System.Drawing.Point(4, 317);
             this.Dgv.Name = "Dgv";
@@ -136,34 +137,85 @@
             this.Dgv.Size = new System.Drawing.Size(842, 221);
             this.Dgv.TabIndex = 6;
             // 
+            // col_Seq
+            // 
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.col_Seq.DefaultCellStyle = dataGridViewCellStyle1;
+            this.col_Seq.HeaderText = "SEQ";
+            this.col_Seq.Name = "col_Seq";
+            this.col_Seq.ReadOnly = true;
+            // 
+            // col_Time
+            // 
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.col_Time.DefaultCellStyle = dataGridViewCellStyle2;
+            this.col_Time.HeaderText = "TIME";
+            this.col_Time.Name = "col_Time";
+            this.col_Time.ReadOnly = true;
+            // 
+            // col_Type
+            // 
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.col_Type.DefaultCellStyle = dataGridViewCellStyle3;
+            this.col_Type.HeaderText = "TYPE";
+            this.col_Type.Name = "col_Type";
+            this.col_Type.ReadOnly = true;
+            // 
+            // col_Mid
+            // 
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.col_Mid.DefaultCellStyle = dataGridViewCellStyle4;
+            this.col_Mid.HeaderText = "MID";
+            this.col_Mid.Name = "col_Mid";
+            this.col_Mid.ReadOnly = true;
+            // 
+            // col_Msg
+            // 
+            this.col_Msg.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.col_Msg.DefaultCellStyle = dataGridViewCellStyle5;
+            this.col_Msg.HeaderText = "Message";
+            this.col_Msg.Name = "col_Msg";
+            this.col_Msg.ReadOnly = true;
+            // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.LightSlateGray;
-            this.panel1.Controls.Add(this.button2);
-            this.panel1.Controls.Add(this.button1);
+            this.panel1.Controls.Add(this.btn_min);
+            this.panel1.Controls.Add(this.btn_exit);
             this.panel1.Controls.Add(this.label5);
             this.panel1.Location = new System.Drawing.Point(4, 6);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(842, 36);
             this.panel1.TabIndex = 7;
             // 
-            // button2
+            // btn_min
             // 
-            this.button2.Location = new System.Drawing.Point(773, 1);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(30, 30);
-            this.button2.TabIndex = 2;
-            this.button2.Text = "button2";
-            this.button2.UseVisualStyleBackColor = true;
+            this.btn_min.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_min.Location = new System.Drawing.Point(773, 1);
+            this.btn_min.Name = "btn_min";
+            this.btn_min.Size = new System.Drawing.Size(30, 30);
+            this.btn_min.TabIndex = 2;
+            this.btn_min.Text = "_";
+            this.btn_min.UseVisualStyleBackColor = true;
+            this.btn_min.Click += new System.EventHandler(this.btn_min_Click);
             // 
-            // button1
+            // btn_exit
             // 
-            this.button1.Location = new System.Drawing.Point(809, 1);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(30, 30);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btn_exit.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_exit.Location = new System.Drawing.Point(809, 1);
+            this.btn_exit.Name = "btn_exit";
+            this.btn_exit.Size = new System.Drawing.Size(30, 30);
+            this.btn_exit.TabIndex = 1;
+            this.btn_exit.Text = "X";
+            this.btn_exit.UseVisualStyleBackColor = true;
+            this.btn_exit.Click += new System.EventHandler(this.btn_exit_Click);
             // 
             // label5
             // 
@@ -193,53 +245,6 @@
             this.label4.Size = new System.Drawing.Size(55, 12);
             this.label4.TabIndex = 10;
             this.label4.Text = "Data Log";
-            // 
-            // col_Seq
-            // 
-            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle13.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.col_Seq.DefaultCellStyle = dataGridViewCellStyle13;
-            this.col_Seq.HeaderText = "SEQ";
-            this.col_Seq.Name = "col_Seq";
-            this.col_Seq.ReadOnly = true;
-            // 
-            // col_Time
-            // 
-            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle14.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.col_Time.DefaultCellStyle = dataGridViewCellStyle14;
-            this.col_Time.HeaderText = "TIME";
-            this.col_Time.Name = "col_Time";
-            this.col_Time.ReadOnly = true;
-            // 
-            // col_Type
-            // 
-            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle15.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle15.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.col_Type.DefaultCellStyle = dataGridViewCellStyle15;
-            this.col_Type.HeaderText = "TYPE";
-            this.col_Type.Name = "col_Type";
-            this.col_Type.ReadOnly = true;
-            // 
-            // col_Mid
-            // 
-            dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle16.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.col_Mid.DefaultCellStyle = dataGridViewCellStyle16;
-            this.col_Mid.HeaderText = "MID";
-            this.col_Mid.Name = "col_Mid";
-            this.col_Mid.ReadOnly = true;
-            // 
-            // col_Msg
-            // 
-            this.col_Msg.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle17.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.col_Msg.DefaultCellStyle = dataGridViewCellStyle17;
-            this.col_Msg.HeaderText = "Message";
-            this.col_Msg.Name = "col_Msg";
-            this.col_Msg.ReadOnly = true;
             // 
             // Form1
             // 
@@ -281,8 +286,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btn_exit;
+        private System.Windows.Forms.Button btn_min;
         private System.Windows.Forms.DataGridViewTextBoxColumn col_Seq;
         private System.Windows.Forms.DataGridViewTextBoxColumn col_Time;
         private System.Windows.Forms.DataGridViewTextBoxColumn col_Type;
