@@ -9,6 +9,7 @@ namespace power4000
         private static readonly string LogDirectory = @"D:\ConWell\Conwell\power4000\power4000\bin\Debug\Log";
         private static readonly string LogFilePrefix = "log_";
         private static readonly long MaxLogFileSize = 2 * 1024 * 1024; // 2 MB
+        private static readonly TimeSpan LogFileDuration = TimeSpan.FromHours(4); // 4 hours
 
         public static void Log(string message)
         {
@@ -29,24 +30,38 @@ namespace power4000
 
         private static string GetLogFilePath()
         {
-            string logFilePath = $"{LogDirectory}{LogFilePrefix}{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+            string logFilePath = $"{LogDirectory}\\{LogFilePrefix}{DateTime.Now:yyyyMMdd_HHmmss}.txt";
 
             if (Directory.Exists(LogDirectory))
             {
                 var logFiles = Directory.GetFiles(LogDirectory, $"{LogFilePrefix}*.txt");
                 if (logFiles.Length > 0)
                 {
-                    logFilePath = logFiles[logFiles.Length - 1];
-                    FileInfo fileInfo = new FileInfo(logFilePath);
-                    if (fileInfo.Length >= MaxLogFileSize)
+                    Array.Sort(logFiles);
+                    Array.Reverse(logFiles); // Newest file first
+
+                    foreach (var file in logFiles)
                     {
-                        logFilePath = $"{LogDirectory}{LogFilePrefix}{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+                        FileInfo fileInfo = new FileInfo(file);
+                        if (fileInfo.CreationTimeUtc <= DateTime.UtcNow - LogFileDuration ||
+                            fileInfo.Length >= MaxLogFileSize)
+                        {
+                            continue;
+                        }
+                        logFilePath = file;
+                        break;
                     }
                 }
             }
             else
             {
                 Directory.CreateDirectory(LogDirectory);
+            }
+
+            // If logFilePath is still the default path, create a new file
+            if (logFilePath == $"{LogDirectory}\\{LogFilePrefix}{DateTime.Now:yyyyMMdd_HHmmss}.txt")
+            {
+                logFilePath = $"{LogDirectory}\\{LogFilePrefix}{DateTime.Now:yyyyMMdd_HHmmss}.txt";
             }
 
             return logFilePath;

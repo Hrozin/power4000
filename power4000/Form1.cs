@@ -148,7 +148,6 @@ namespace power4000
 
             Dgv.Invoke((Action)(() =>
             {
-
                 // Check if the data already exists in Dgv to prevent duplicates
                 bool alreadyExists = Dgv.Rows.Cast<DataGridViewRow>().Any(row =>
                     row.Cells["col_Time"].Value?.ToString() == currentTime &&
@@ -199,7 +198,7 @@ namespace power4000
         private async Task Response0035()
         {
             // Stop keep-alive thread
-            keepAliveCancellationTokenSource.Cancel();
+            //keepAliveCancellationTokenSource.Cancel();
             // Send the response message for "0035"
             await SendData(socket, "00200036001         ");
         }
@@ -207,7 +206,7 @@ namespace power4000
         private async Task Response0061()
         {
             // Stop keep-alive thread
-            keepAliveCancellationTokenSource.Cancel();
+            //keepAliveCancellationTokenSource.Cancel();
             // Send the response message for "0061"
             await SendData(socket, "00200062001         ");
         }
