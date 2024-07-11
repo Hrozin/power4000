@@ -21,16 +21,15 @@ namespace power4000
         private void btn_log_Click(object sender, EventArgs e)
         {
             Form1 frm = new Form1();
-            //frm.Show();                      
 
             if (txt_pw.Text == "2580")
             {
                 frm.Show();
-                this.Close();
+                Close();
             }
             else
             {
-                MessageBox.Show("비밀번호 틀렸지롱^^");
+                MessageBox.Show("Wrong Password^^");
             }
 
         }
@@ -39,7 +38,7 @@ namespace power4000
         {
             if (e.KeyCode == Keys.Enter)
             {
-                this.btn_log_Click(sender, e);              
+                btn_log_Click(sender, e);              
             }
             else if (e.KeyCode == Keys.Escape)
             {

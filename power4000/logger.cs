@@ -6,7 +6,7 @@ namespace power4000
 {
     public static class Logger
     {
-        private static readonly string LogDirectory = @"D:\ConWell\Conwell\power4000\power4000\bin\Debug\Log";
+        private static readonly string LogDirectory = @"D:\ConWell\Conwell\power4000_2(End)\power4000\bin\Debug\Log";
         private static readonly string LogFilePrefix = "log_";
         private static readonly long MaxLogFileSize = 2 * 1024 * 1024; // 2 MB
         private static readonly TimeSpan LogFileDuration = TimeSpan.FromHours(4); // 4 hours
