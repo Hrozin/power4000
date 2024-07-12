@@ -23,7 +23,7 @@ namespace power4000
         {
             string logFilePath = GetLogFilePath();
             string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            string logEntry = $"[{currentTime}] [{type}] {data} {Environment.NewLine}";
+            string logEntry = $"[{currentTime}] [{type}] - {data} {Environment.NewLine}";
 
             File.AppendAllText(logFilePath, logEntry, Encoding.UTF8);
         }

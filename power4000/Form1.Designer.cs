@@ -32,7 +32,6 @@ namespace power4000
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -45,19 +44,21 @@ namespace power4000
             this.txtip = new System.Windows.Forms.TextBox();
             this.txtport = new System.Windows.Forms.TextBox();
             this.Dgv = new System.Windows.Forms.DataGridView();
+            this.col_Seq = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.col_Daytime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.col_Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.col_Mid = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.col_Msg = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_min = new System.Windows.Forms.Button();
             this.btn_exit = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.col_Seq = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.col_Daytime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.col_Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.col_Mid = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.col_Msg = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.panel2 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.Dgv)).BeginInit();
             this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // btn_start
@@ -117,7 +118,7 @@ namespace power4000
             // 
             this.Dgv.AllowUserToAddRows = false;
             this.Dgv.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders;
-            this.Dgv.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.Dgv.BackgroundColor = System.Drawing.SystemColors.ButtonHighlight;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
@@ -141,16 +142,63 @@ namespace power4000
             dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.Dgv.DefaultCellStyle = dataGridViewCellStyle7;
             this.Dgv.GridColor = System.Drawing.SystemColors.Control;
-            this.Dgv.Location = new System.Drawing.Point(4, 317);
+            this.Dgv.Location = new System.Drawing.Point(4, 7);
             this.Dgv.Name = "Dgv";
             this.Dgv.ReadOnly = true;
             this.Dgv.RowHeadersVisible = false;
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            //this.Dgv.RowsDefaultCellStyle = dataGridViewCellStyle8;
+            this.Dgv.RowCount = 12;
             this.Dgv.RowTemplate.Height = 23;
             this.Dgv.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.Dgv.Size = new System.Drawing.Size(842, 221);
+            this.Dgv.Size = new System.Drawing.Size(842, 243);
             this.Dgv.TabIndex = 6;
+            // 
+            // col_Seq
+            // 
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.col_Seq.DefaultCellStyle = dataGridViewCellStyle2;
+            this.col_Seq.HeaderText = "SEQ";
+            this.col_Seq.Name = "col_Seq";
+            this.col_Seq.ReadOnly = true;
+            // 
+            // col_Daytime
+            // 
+            this.col_Daytime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.col_Daytime.DefaultCellStyle = dataGridViewCellStyle3;
+            this.col_Daytime.HeaderText = "TIME";
+            this.col_Daytime.Name = "col_Daytime";
+            this.col_Daytime.ReadOnly = true;
+            this.col_Daytime.Width = 60;
+            // 
+            // col_Type
+            // 
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.col_Type.DefaultCellStyle = dataGridViewCellStyle4;
+            this.col_Type.HeaderText = "TYPE";
+            this.col_Type.Name = "col_Type";
+            this.col_Type.ReadOnly = true;
+            // 
+            // col_Mid
+            // 
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.col_Mid.DefaultCellStyle = dataGridViewCellStyle5;
+            this.col_Mid.HeaderText = "MID";
+            this.col_Mid.Name = "col_Mid";
+            this.col_Mid.ReadOnly = true;
+            // 
+            // col_Msg
+            // 
+            this.col_Msg.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.col_Msg.DefaultCellStyle = dataGridViewCellStyle6;
+            this.col_Msg.HeaderText = "Message";
+            this.col_Msg.Name = "col_Msg";
+            this.col_Msg.ReadOnly = true;
             // 
             // panel1
             // 
@@ -211,65 +259,28 @@ namespace power4000
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(9, 297);
+            this.label4.Location = new System.Drawing.Point(10, 275);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(55, 12);
             this.label4.TabIndex = 10;
             this.label4.Text = "Data Log";
             // 
-            // col_Seq
+            // panel2
             // 
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.col_Seq.DefaultCellStyle = dataGridViewCellStyle2;
-            this.col_Seq.HeaderText = "SEQ";
-            this.col_Seq.Name = "col_Seq";
-            this.col_Seq.ReadOnly = true;
-            // 
-            // col_Daytime
-            // 
-            this.col_Daytime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.col_Daytime.DefaultCellStyle = dataGridViewCellStyle3;
-            this.col_Daytime.HeaderText = "TIME";
-            this.col_Daytime.Name = "col_Daytime";
-            this.col_Daytime.ReadOnly = true;
-            this.col_Daytime.Width = 60;
-            // 
-            // col_Type
-            // 
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.col_Type.DefaultCellStyle = dataGridViewCellStyle4;
-            this.col_Type.HeaderText = "TYPE";
-            this.col_Type.Name = "col_Type";
-            this.col_Type.ReadOnly = true;
-            // 
-            // col_Mid
-            //            
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.col_Mid.DefaultCellStyle = dataGridViewCellStyle5;
-            this.col_Mid.HeaderText = "MID";
-            this.col_Mid.Name = "col_Mid";
-            this.col_Mid.ReadOnly = true;
-            // 
-            // col_Msg
-            // 
-            this.col_Msg.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.col_Msg.DefaultCellStyle = dataGridViewCellStyle6;
-            this.col_Msg.HeaderText = "Message";
-            this.col_Msg.Name = "col_Msg";
-            this.col_Msg.ReadOnly = true;
+            this.panel2.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.panel2.Controls.Add(this.Dgv);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel2.Location = new System.Drawing.Point(0, 297);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(850, 253);
+            this.panel2.TabIndex = 11;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(850, 550);
+            this.Controls.Add(this.panel2);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.btn_end);
             this.Controls.Add(this.btn_start);
@@ -278,7 +289,6 @@ namespace power4000
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.Dgv);
             this.Controls.Add(this.txtip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "Form1";
@@ -291,6 +301,7 @@ namespace power4000
             ((System.ComponentModel.ISupportInitialize)(this.Dgv)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -316,6 +327,7 @@ namespace power4000
         private System.Windows.Forms.DataGridViewTextBoxColumn col_Type;
         private System.Windows.Forms.DataGridViewTextBoxColumn col_Mid;
         private System.Windows.Forms.DataGridViewTextBoxColumn col_Msg;
+        private System.Windows.Forms.Panel panel2;
     }
 }
 
