@@ -6,7 +6,7 @@ namespace power4000
 {
     public static class Logger
     {
-        private static readonly string LogDirectory = @"D:\ConWell\Conwell\power4000_2(End)\power4000\bin\Debug\Log";
+        private static readonly string LogDirectory = @"C:\Users\hahj1\OneDrive\바탕 화면\power4000_2(0711_수정)\power4000\bin\Release\log";
         private static readonly string LogFilePrefix = "log_";
         private static readonly long MaxLogFileSize = 2 * 1024 * 1024; // 2 MB
         private static readonly TimeSpan LogFileDuration = TimeSpan.FromHours(4); // 4 hours
@@ -14,7 +14,7 @@ namespace power4000
         public static void Log(string message)
         {
             string logFilePath = GetLogFilePath();
-            string logEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {message}{Environment.NewLine}";
+            string logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message} {Environment.NewLine}";
 
             File.AppendAllText(logFilePath, logEntry, Encoding.UTF8);
         }
@@ -22,8 +22,8 @@ namespace power4000
         public static void LogData(string data, string type)
         {
             string logFilePath = GetLogFilePath();
-            string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss: ");
-            string logEntry = $"{currentTime} [{type}] {data}{Environment.NewLine}";
+            string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string logEntry = $"[{currentTime}] [{type}] {data} {Environment.NewLine}";
 
             File.AppendAllText(logFilePath, logEntry, Encoding.UTF8);
         }
