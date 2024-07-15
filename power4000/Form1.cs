@@ -15,10 +15,15 @@ namespace power4000
     {
         private CancellationTokenSource keepAliveCancellationTokenSource;
         private Socket socket;
+        
+        // Dgv 시작 시퀀스
         private int Sequence = 1;
+        // Form1 이동
         bool FormMove;
-        int FormMX, FormMY; // 폼 X, Y
-        // 동기화 객체 추가, 초기 항목 수와 최대 동시 수를 지정, 스레드들이 순차적 접근하도록 하는 역할
+        int FormMX, FormMY;
+
+        // 동기화 객체 추가, 초기 항목 수와 최대 동시 수를 지정
+        // 스레드들이 순차적 접근하도록 하는 역할
         private SemaphoreSlim sendSemaphore = new SemaphoreSlim(1, 1);
 
         public Form1()
@@ -51,10 +56,10 @@ namespace power4000
                 IPAddress ipAddress = IPAddress.Parse(IP);
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, Port);
 
-                // 서버에 연결
+                // 서버 연결
                 await socket.ConnectAsync(remoteEP);
 
-                Logger.Log("Server Connecting " + IP + ": " + Port);
+                Logger.Log("Server Connection " + IP + ": " + Port);
 
                 // 메시지 시퀀스 실행
                 if (await BeforeWaitingMode(socket))
@@ -66,9 +71,14 @@ namespace power4000
             }
             catch (Exception ex)
             {
-                string errorMsg = "Server Connection Fail : " + ex.Message;
-                MessageBox.Show(errorMsg, "Connection Fail", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string errorMsg = "Server Connection Failed : " + ex.Message;
+                MessageBox.Show(errorMsg, "Connection Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Logger.Log("Exception: " + ex.Message);
+
+                btn_start.Enabled = true;
+                btn_end.Enabled = false;
+                txtip.ReadOnly = false;
+                txtport.ReadOnly = false;
             }
         }
 
@@ -82,21 +92,24 @@ namespace power4000
 
             for (int i = 0; i < Signal.Length; i++)
             {
-                Logger.LogData(Signal[i], "SEND"); // Added logging for SEND messages) (Server)
+                // 송신 메세지 로그 추가(Server)
+                Logger.LogData(Signal[i], "SEND");
+
+                //재시도(3번시도, 8초 대기)
                 bool result = await SendAndRecvWithRetry(socket, Signal[i], SignalRes[i], 3, 8000);
                 if (!result)
                 {
-                    Logger.LogData(Signal[i], "SEND FAIL"); // Added logging for failed SEND messages
+                    // 송신 메세지 로그 추가(Server)
+                    Logger.LogData(Signal[i], "SEND FAIL");
                     return false;
                 }
-                //Logger.LogData(SignalRes[i], "RECV"); // Added logging for RECV messages (Server)
-            }            
+            }
             return true;
         }
 
 
 
-        // 송수신이 되지 않을 경우 Retry메세지 박스 및 재시도
+        // 송수신이 되지 않을 경우 재시도
         private async Task<bool> SendAndRecvWithRetry(Socket socket, string sendMsg, string expectedRecvMsg, int maxRetries, int delay)
         {
             for (int attempt = 0; attempt < maxRetries; attempt++)
@@ -112,16 +125,40 @@ namespace power4000
                         $"Failed to receive the message. {maxRetries - attempt - 1} more attempts left. Do you want to continue?",
                         "Retry",
                         MessageBoxButtons.RetryCancel,
-                        MessageBoxIcon.Warning);
+                        MessageBoxIcon.Warning);                    
 
                     if (retryResult == DialogResult.Cancel)
                     {
                         return false;
                     }
+
                     await Task.Delay(delay);
+
+                    // 소켓 연결 재시도
+                    try
+                    {
+                        if (!socket.Connected)
+                        {                            
+                            string IP = txtip.Text;
+                            int Port = int.Parse(txtport.Text);
+
+                            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                            IPAddress ipAddress = IPAddress.Parse(IP);
+                            IPEndPoint remoteEP = new IPEndPoint(ipAddress, Port);
+
+                            await socket.ConnectAsync(remoteEP);
+
+                            Logger.Log($"Reconnect to Server {IP}: {Port}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log($"Server reconnection Failed: {ex.Message}");
+                    }
                 }
             }
-            EndOfConn();
+            // 최종 연결 실패 시 처리
+            EndConn();
             return false;
         }
 
@@ -136,20 +173,25 @@ namespace power4000
                 await sendSemaphore.WaitAsync();
 
                 byte[] sendBuffer = Encoding.ASCII.GetBytes(sendMsg);
+
+                // ArraySegment => Array Wrapper, 1차원 배열 내의 요소를 범위 지정 후 구분
+                // Buffer 내의 데이터 참조를 위함
                 await socket.SendAsync(new ArraySegment<byte>(sendBuffer), SocketFlags.None);
 
                 byte[] recvBuffer = new byte[1024];
                 int recvBytes = await socket.ReceiveAsync(new ArraySegment<byte>(recvBuffer), SocketFlags.None);
                 string recvMsg = Encoding.ASCII.GetString(recvBuffer, 0, recvBytes);
 
+                // 비동기로 실행 중 Dgv 업데이트
+                // 데이터 중복 출력 방지
                 Invoke((Action)(() =>
                 {
                     DataInDgv(sendMsg, "SEND");
                     DataInDgv(recvMsg, "RECV");
                 }));
 
-                //Logger.LogData(sendMsg, "SEND"); // Added logging for SEND messages, Waiting Mode 이전 메세지
-                Logger.LogData(recvMsg, "RECV"); // Added logging for RECV messages, Waiting Mode 이전 메세지
+                // RECV 메세지 로깅 추가, Waiting Mode 이전 메세지
+                Logger.LogData(recvMsg, "RECV");
 
                 return recvMsg.Contains(expectedRecvMsg);
             }
@@ -175,11 +217,13 @@ namespace power4000
 
             try
             {
+                //바이트 배열 Encoding 후 서버로 송신
                 byte[] data = Encoding.ASCII.GetBytes(Message);
                 await socket.SendAsync(new ArraySegment<byte>(data), SocketFlags.None);
 
+                // 9999 대기 모드 메시지 수신
                 Logger.Log("[SEND] - " + Message);
-                //Logger.LogData(Message, "SEND");
+                
                 DataInDgv(Message, "SEND");
             }
             finally
@@ -196,10 +240,12 @@ namespace power4000
         {
             byte[] buffer = new byte[256];
             int bytesRead = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), SocketFlags.None);
+
+            //수신 데이터 문자열로 변환
             string RespData = Encoding.ASCII.GetString(buffer, 0, bytesRead);
 
-            Logger.Log("[RECV] - " + RespData); // 9999 Waiting Mode Message RECV
-            //Logger.LogData(RespData, "RECV"); // Added logging for RECV messages
+            // 9999 대기 모드 메시지 수신
+            Logger.Log("[RECV] - " + RespData);
 
             return RespData;
         }
@@ -212,9 +258,17 @@ namespace power4000
             string Mid = data.Substring(4, 4);
             string currentTime = DateTime.Now.ToString("yyyy-MM-d HH:mm:ss");
 
+            // DataGridView Sort
+            foreach (DataGridViewColumn column in Dgv.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+
+            // Dgv 행 추가 or 수정
+            // UI 스레드에서 수행
             Dgv.Invoke((Action)(() =>
             {
-                // 비어있는 행을 제거합니다.
+                // 비어있는 행을 제거
                 for (int i = Dgv.Rows.Count - 1; i >= 0; i--)
                 {
                     DataGridViewRow r = Dgv.Rows[i];
@@ -232,9 +286,9 @@ namespace power4000
                 Row.Cells["col_Type"].Value = type;
                 Row.Cells["col_Msg"].Value = data;
 
-                if (type == "SEND" && data == "00209999001         ")
+                if (type == "SEND" && data == "00209999            ")
                 {
-                    Row.Cells["col_Msg"].Value = "Waiting For Connection";
+                    Row.Cells["col_Msg"].Value = "00209999            ";
                 }
 
                 if (type == "RECV")
@@ -244,11 +298,14 @@ namespace power4000
                 else if (type == "Debug")
                 {
                     Row.DefaultCellStyle.ForeColor = Color.Red;
+                    Row.Cells["col_Msg"].Value = "No response terminates the connection";
+                    Logger.Log("[DEBUG] - " + "No response terminates the connection");
                 }
-                else
+                else if (type == "INFO" && data == "                    ")
                 {
-                    Row.DefaultCellStyle.ForeColor = Color.Black;
-                }
+                    Row.Cells["col_Msg"].Value = "Waiting For Connection";
+                    Row.DefaultCellStyle.ForeColor= Color.Black;
+                }                
             }));
         }
 
@@ -260,41 +317,41 @@ namespace power4000
             switch (Mid)
             {
                 case "0052":
-                    await Response0052();
+                    await SendResponse("00200053001         ");
                     break;
                 case "0035":
-                    await Response0035();
+                    await SendResponse("00200036001         ");
                     break;
                 case "0061":
-                    await Response0061();
+                    await SendResponse("00200062001         ");
                     break;
                 default:
+                    //await SendDefaultResponse();
                     break;
             }
         }
 
 
+        // Waiting Mode 실행 중 중복 값 출력 방지
+        //private async Task SendDefaultResponse()
+        //{
 
-        #region Waiting Mode 이후 값
-        private async Task Response0052()
+        //    string defaultResponse = "00209999         ";
+
+        //    await S_Data(socket, defaultResponse);
+        //}
+
+
+
+        // Waiting Mode 이후 값, 송신
+        private async Task SendResponse(string message)
         {
-            await S_Data(socket, "00200053001         ");
+            await S_Data(socket, message);
         }
 
-        private async Task Response0035()
-        {
-            await S_Data(socket, "00200036001         ");
-        }
-
-        private async Task Response0061()
-        {
-            await S_Data(socket, "00200062001         ");
-        }
-        #endregion
 
 
-
-        // Waiting Mode 토큰
+        // Waiting Mode 토큰, 비동기 사용 취소
         private void WaitingMode()
         {
             keepAliveCancellationTokenSource = new CancellationTokenSource();
@@ -313,12 +370,12 @@ namespace power4000
                 {
                     if (socket != null && socket.Connected)
                     {
-                        string keepAliveMessage = "00209999001         ";
+                        string keepAliveMessage = "00209999            ";
                         await S_Data(socket, keepAliveMessage);
                     }
                     else
                     {
-                        EndOfConn();
+                        EndConn();
                         break;
                     }
                 }
@@ -326,10 +383,10 @@ namespace power4000
                 {
                     Logger.Log("Exception Issue: " + ex.Message);
 
-                    EndOfConn();
+                    EndConn();
                     break;
-                }
-                // Waiting Delay
+                }                
+                // 대기 지연 시간
                 await Task.Delay(8000);
             }
         }
@@ -344,7 +401,7 @@ namespace power4000
 
 
 
-        // 수신 받은 데이터 확인 및 DataGridView 출력
+        // 수신 받은 데이터 확인
         private async Task RecvDataLoop()
         {
             while (true)
@@ -364,7 +421,7 @@ namespace power4000
                         }
                         else
                         {
-                            EndOfConn();
+                            EndConn();                            
                             break;
                         }
                     }
@@ -373,7 +430,7 @@ namespace power4000
                 {
                     Logger.Log("Failed to receive data: " + ex.Message);
 
-                    EndOfConn();
+                    EndConn();
                     break;
                 }
             }
@@ -382,9 +439,10 @@ namespace power4000
 
 
         // 연결이 끊어졌을 경우
-        private void EndOfConn()
-        {
-            string Message = "00200004001         ";
+        // DataInDgv => col_type "Debug"출력
+        private void EndConn()
+        {            
+            string Message = "                 ";
             DataInDgv(Message, "Debug");
 
             Invoke((Action)(() =>
@@ -395,11 +453,11 @@ namespace power4000
                 txtport.ReadOnly = false;
             }));
 
-            MessageBox.Show("The connection will be terminated");
+            MessageBox.Show("연결이 종료됩니다.");
         }
 
 
-
+        // 로컬IP
         private string LocalIP()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -410,7 +468,7 @@ namespace power4000
                     return ip.ToString();
                 }
             }
-            throw new Exception("Unable to find local IP");
+            throw new Exception("로컬 IP를 찾을 수 없습니다.");
         }
 
 
@@ -464,7 +522,7 @@ namespace power4000
             }
             finally
             {
-                // btn_start 버튼을 다시 활성화
+                // btn_start 버튼을 재활성화
                 btn_start.Enabled = true;
                 btn_end.Enabled = false;
                 txtip.ReadOnly = false;

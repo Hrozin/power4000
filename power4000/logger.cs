@@ -6,11 +6,12 @@ namespace power4000
 {
     public static class Logger
     {
-        private static readonly string LogDirectory = @"C:\Users\hahj1\OneDrive\바탕 화면\power4000_2(0711_수정)\power4000\bin\Release\log";
+        private static readonly string LogDirectory = @"D:\ConWell\Conwell\power4000_2(0712)\power4000\bin\Release\log";
         private static readonly string LogFilePrefix = "log_";
         private static readonly long MaxLogFileSize = 2 * 1024 * 1024; // 2 MB
         private static readonly TimeSpan LogFileDuration = TimeSpan.FromHours(4); // 4 hours
 
+        // Message
         public static void Log(string message)
         {
             string logFilePath = GetLogFilePath();
@@ -19,6 +20,7 @@ namespace power4000
             File.AppendAllText(logFilePath, logEntry, Encoding.UTF8);
         }
 
+        // Data, Type
         public static void LogData(string data, string type)
         {
             string logFilePath = GetLogFilePath();
